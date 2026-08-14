@@ -34,7 +34,7 @@ export default function HomeClient({
       <HeroGrid posts={heroPosts} />
 
       {/* HORIZONTAL AD: Between Hero Grid and Main Content */}
-      <AdBanner slotId="YOUR_HOMEPAGE_HERO_BOTTOM_SLOT" />
+      <AdBanner slotId="4079373943" />
 
       {/* MAIN HOMEPAGE GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -52,7 +52,7 @@ export default function HomeClient({
           />
 
           {/* HORIZONTAL AD: Between Categories */}
-          <AdBanner slotId="YOUR_HOMEPAGE_MID_FEED_SLOT_1" />
+          <AdBanner slotId="4079373943" />
 
           {/* 3. Analysis Section (Compact Layout) */}
           {initialAnalysis && initialAnalysis.length > 0 && (
@@ -67,7 +67,7 @@ export default function HomeClient({
           )}
 
           {/* HORIZONTAL AD: Between Categories */}
-          <AdBanner slotId="YOUR_HOMEPAGE_MID_FEED_SLOT_2" />
+          <AdBanner slotId="4079373943" />
 
           {/* 4. Exclusive Section (Compact Layout) */}
           {initialExclusives && initialExclusives.length > 0 && (
@@ -87,7 +87,7 @@ export default function HomeClient({
         <div className="lg:col-span-1 sticky top-24 self-start flex flex-col gap-6 pt-16 mt-16 lg:pt-0 lg:mt-0">
           
           {/* DESKTOP SIDEBAR AD 1 */}
-          <AdBanner slotId="YOUR_DESKTOP_SIDEBAR_SLOT_1" />
+          <AdBanner slotId="3640703662" />
 
           {/* Banner 1 */}
           <div className="rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-200 dark:border-zinc-800 block">
@@ -105,7 +105,7 @@ export default function HomeClient({
           </div>
 
           {/* DESKTOP SIDEBAR AD 2 */}
-          <AdBanner slotId="YOUR_DESKTOP_SIDEBAR_SLOT_2" />
+          <AdBanner slotId="3640703662" />
 
           {/* Banner 2 */}
           <div className="rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-200 dark:border-zinc-800 block">
@@ -123,7 +123,7 @@ export default function HomeClient({
           </div>
           
           {/* DESKTOP SIDEBAR AD 3 */}
-          <AdBanner slotId="YOUR_DESKTOP_SIDEBAR_SLOT_3" />
+          <AdBanner slotId="3640703662" />
 
         </div>
 

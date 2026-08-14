@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // 1. Tell Next.js to generate a static HTML export
+  output: "export",
+  
   images: {
+    // 2. Disable server-side image optimization (required for static exports)
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',

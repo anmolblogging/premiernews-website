@@ -94,7 +94,7 @@ export default function MobileTabs({
       <div className="flex flex-col gap-6 mt-12 pt-8 border-t border-slate-200 dark:border-zinc-800">
         
         {/* MOBILE AD UNIT 1 */}
-        <AdBanner slotId="YOUR_MOBILE_TAB_SLOT_1" />
+        <AdBanner slotId="3640703662" />
 
         {/* Banner 1 */}
         <div className="rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-200 dark:border-zinc-800 block">
@@ -112,7 +112,7 @@ export default function MobileTabs({
         </div>
 
         {/* MOBILE AD UNIT 2 */}
-        <AdBanner slotId="YOUR_MOBILE_TAB_SLOT_2" />
+        <AdBanner slotId="3640703662" />
 
         {/* Banner 2 */}
         <div className="rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-200 dark:border-zinc-800 block">
@@ -130,7 +130,7 @@ export default function MobileTabs({
         </div>
         
         {/* MOBILE AD UNIT 3 */}
-        <AdBanner slotId="YOUR_MOBILE_TAB_SLOT_3" />
+        <AdBanner slotId="3640703662" />
 
       </div>
 

@@ -6,7 +6,29 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { decodeHtml, getImageUrl, getPostPath } from '@/lib/wp';
 import Comments from '@/components/Comments';
-import AdBanner from '@/components/AdBanner'; // <-- 1. IMPORT ADBANNER COMPONENT
+import AdBanner from '@/components/AdBanner'; 
+
+// Tell Next.js which article slugs and dates to statically build
+export async function generateStaticParams() {
+  try {
+    const res = await fetch('https://premierleaguenewsnow.com/wp-json/wp/v2/posts?per_page=100');
+    if (!res.ok) return [];
+    const posts = await res.json();
+    
+    return posts.map((post: any) => {
+      const date = new Date(post.date);
+      return {
+        year: date.getFullYear().toString(),
+        month: (date.getMonth() + 1).toString().padStart(2, '0'),
+        day: date.getDate().toString().padStart(2, '0'),
+        slug: post.slug,
+      };
+    });
+  } catch (error) {
+    console.error("Error generating static params for posts:", error);
+    return [];
+  }
+}
 
 export async function generateMetadata({ 
   params 
@@ -16,45 +38,49 @@ export async function generateMetadata({
   const resolvedParams = await params;
   const { slug } = resolvedParams;
 
-  const res = await fetch(
-    `https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&slug=${slug}`,
-    { next: { revalidate: 300 } }
-  );
+  try {
+    const res = await fetch(
+      `https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&slug=${slug}`,
+      { next: { revalidate: 300 } }
+    );
 
-  if (!res.ok) return {};
-  const posts = await res.json();
-  if (!posts || posts.length === 0) return {};
+    if (!res.ok) return {}; // SAFEGUARD ADDED
+    const posts = await res.json();
+    if (!posts || posts.length === 0) return {};
 
-  const post = posts[0];
-  const seo = post.aioseo_head_json;
+    const post = posts[0];
+    const seo = post.aioseo_head_json;
 
-  if (!seo) {
-    return { title: decodeHtml(post.title?.rendered || 'Article') };
-  }
-
-  return {
-    title: seo.title || decodeHtml(post.title.rendered),
-    description: seo.description,
-    keywords: seo.keywords ? seo.keywords.split(',') : [],
-    alternates: {
-      canonical: seo.canonical_url,
-    },
-    openGraph: {
-      title: seo["og:title"] || seo.title,
-      description: seo["og:description"] || seo.description,
-      url: seo["og:url"],
-      images: seo["og:image"] ? [{ url: seo["og:image"] }] : [],
-      type: "article",
-      publishedTime: seo["article:published_time"],
-      modifiedTime: seo["article:modified_time"],
-    },
-    twitter: {
-      card: seo["twitter:card"] as any || "summary_large_image",
-      title: seo["twitter:title"] || seo.title,
-      description: seo["twitter:description"] || seo.description,
-      images: seo["twitter:image"] ? [seo["twitter:image"]] : [],
+    if (!seo) {
+      return { title: decodeHtml(post.title?.rendered || 'Article') };
     }
-  };
+
+    return {
+      title: seo.title || decodeHtml(post.title.rendered),
+      description: seo.description,
+      keywords: seo.keywords ? seo.keywords.split(',') : [],
+      alternates: {
+        canonical: seo.canonical_url,
+      },
+      openGraph: {
+        title: seo["og:title"] || seo.title,
+        description: seo["og:description"] || seo.description,
+        url: seo["og:url"],
+        images: seo["og:image"] ? [{ url: seo["og:image"] }] : [],
+        type: "article",
+        publishedTime: seo["article:published_time"],
+        modifiedTime: seo["article:modified_time"],
+      },
+      twitter: {
+        card: seo["twitter:card"] as any || "summary_large_image",
+        title: seo["twitter:title"] || seo.title,
+        description: seo["twitter:description"] || seo.description,
+        images: seo["twitter:image"] ? [seo["twitter:image"]] : [],
+      }
+    };
+  } catch {
+    return {};
+  }
 }
 
 export default async function SinglePostPage({ 
@@ -70,7 +96,7 @@ export default async function SinglePostPage({
     { next: { revalidate: 300 } }
   );
 
-  if (!res.ok) return notFound();
+  if (!res.ok) return notFound(); // SAFEGUARD ADDED
   
   const posts = await res.json();
   if (!posts || posts.length === 0) return notFound();
@@ -178,7 +204,7 @@ export default async function SinglePostPage({
 
             {/* 2. AD UNIT ABOVE ARTICLE CONTENT */}
             <div className="w-full max-w-3xl">
-              <AdBanner slotId="YOUR_ABOVE_ARTICLE_SLOT_ID" />
+              <AdBanner slotId="6658379634" />
             </div>
 
             <div className="w-full max-w-3xl">
@@ -207,7 +233,7 @@ export default async function SinglePostPage({
 
             {/* 3. AD UNIT BELOW ARTICLE CONTENT */}
             <div className="w-full max-w-3xl">
-              <AdBanner slotId="YOUR_BELOW_ARTICLE_SLOT_ID" />
+              <AdBanner slotId="8574789160" />
             </div>
 
             {tags.length > 0 && (
@@ -254,7 +280,7 @@ export default async function SinglePostPage({
           <div className="lg:col-span-4 sticky top-24 self-start flex flex-col gap-8">
             
             {/* 4. AD UNIT: SIDEBAR TOP */}
-            <AdBanner slotId="YOUR_SIDEBAR_TOP_SLOT_ID" />
+            <AdBanner slotId="3640703662" />
 
             {sidebarPosts.length > 0 && (
               <div className="bg-white dark:bg-zinc-950 rounded-2xl p-6 border border-slate-200 dark:border-zinc-800 shadow-sm">
@@ -281,7 +307,7 @@ export default async function SinglePostPage({
             )}
 
             {/* 5. AD UNIT: SIDEBAR BOTTOM */}
-            <AdBanner slotId="YOUR_SIDEBAR_BOTTOM_SLOT_ID" />
+            <AdBanner slotId="3640703662" />
 
             <div className="rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-200 dark:border-zinc-800">
               <a href="https://www.sportwettenschweiz.org" target="_blank" rel="noopener noreferrer">

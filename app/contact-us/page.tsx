@@ -12,6 +12,9 @@ export async function generateMetadata(): Promise<Metadata> {
       `https://premierleaguenewsnow.com/wp-json/wp/v2/pages?_embed&slug=${slug}`,
       { next: { revalidate: 3600 } }
     );
+    
+    if (!res.ok) return { title: 'Contact Us' }; // SAFEGUARD ADDED
+    
     const pages = await res.json();
     if (!pages || pages.length === 0) return { title: 'Contact Us' };
 
@@ -55,6 +58,8 @@ export default async function StaticPage() {
     `https://premierleaguenewsnow.com/wp-json/wp/v2/pages?_embed&slug=${slug}`, 
     { next: { revalidate: 3600 } }
   );
+  
+  if (!res.ok) return notFound(); // SAFEGUARD ADDED
   
   const pages = await res.json();
   if (!pages || pages.length === 0) return notFound();

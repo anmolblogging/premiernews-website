@@ -5,6 +5,22 @@ import { Metadata } from 'next';
 import { decodeHtml, getPostPath, Post } from '@/lib/wp';
 import CategorySection from '@/components/CategorySection';
 
+// Tell Next.js which category slugs to statically build
+export async function generateStaticParams() {
+  try {
+    const res = await fetch('https://premierleaguenewsnow.com/wp-json/wp/v2/categories?per_page=100');
+    if (!res.ok) return [];
+    const categories = await res.json();
+    
+    return categories.map((category: any) => ({
+      slug: category.slug,
+    }));
+  } catch (error) {
+    console.error("Error generating static params for categories:", error);
+    return [];
+  }
+}
+
 // 1. Dynamic SEO Metadata Generator for Category Archives
 export async function generateMetadata({ 
   params 
@@ -19,6 +35,9 @@ export async function generateMetadata({
       `https://premierleaguenewsnow.com/wp-json/wp/v2/categories?slug=${slug}`,
       { next: { revalidate: 300 } }
     );
+    
+    if (!catRes.ok) return { title: 'Category News' }; // SAFEGUARD ADDED
+    
     const categories = await catRes.json();
     if (!categories || categories.length === 0) return { title: 'Category News' };
 
@@ -66,8 +85,10 @@ export default async function CategoryArchivePage({
   const resolvedParams = await params;
   const { slug } = resolvedParams;
 
-  // 1. Fetch the category object
+  // 1. Fetch the category object safely
   const catRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/categories?slug=${slug}`);
+  if (!catRes.ok) return notFound(); // SAFEGUARD ADDED
+  
   const categories = await catRes.json();
   if (!categories || categories.length === 0) return notFound();
   const category = categories[0];
@@ -76,11 +97,18 @@ export default async function CategoryArchivePage({
   const seoTitle = category.aioseo_head_json?.title || category.name;
   const seoDescription = category.aioseo_head_json?.description || category.description || '';
 
-  // 3. Fetch initial posts for this category
-  const postsRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&categories=${category.id}&per_page=10`);
-  const initialPosts = await postsRes.json();
+  // 3. Fetch initial posts for this category safely
+  let initialPosts = [];
+  try {
+    const postsRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&categories=${category.id}&per_page=10`);
+    if (postsRes.ok) { // SAFEGUARD ADDED
+      initialPosts = await postsRes.json();
+    }
+  } catch (error) {
+    console.error("Failed to load category posts", error);
+  }
 
-  // 4. Fetch Sidebar Posts
+  // 4. Fetch Sidebar Posts safely
   let sidebarPosts: Post[] = [];
   try {
     const sbRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&per_page=6&categories=7,8`);

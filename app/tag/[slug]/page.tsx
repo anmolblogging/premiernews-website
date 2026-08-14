@@ -5,6 +5,22 @@ import { Metadata } from 'next';
 import { decodeHtml, getPostPath, Post } from '@/lib/wp';
 import CategorySection from '@/components/CategorySection';
 
+// Tell Next.js which tag slugs to statically build
+export async function generateStaticParams() {
+  try {
+    const res = await fetch('https://premierleaguenewsnow.com/wp-json/wp/v2/tags?per_page=100');
+    if (!res.ok) return [];
+    const tags = await res.json();
+    
+    return tags.map((tag: any) => ({
+      slug: tag.slug,
+    }));
+  } catch (error) {
+    console.error("Error generating static params for tags:", error);
+    return [];
+  }
+}
+
 // 1. Dynamic SEO Metadata Generator for Tag / Club Archives
 export async function generateMetadata({ 
   params 
@@ -19,6 +35,10 @@ export async function generateMetadata({
       `https://premierleaguenewsnow.com/wp-json/wp/v2/tags?slug=${slug}`,
       { next: { revalidate: 300 } }
     );
+    
+    // SAFEGUARD: Check if the response is valid before parsing JSON
+    if (!tagRes.ok) return { title: 'Tag News' };
+    
     const tags = await tagRes.json();
     if (!tags || tags.length === 0) return { title: 'Tag News' };
 
@@ -66,8 +86,10 @@ export default async function TagArchivePage({
   const resolvedParams = await params;
   const { slug } = resolvedParams;
 
-  // 1. Fetch the tag object
+  // 1. Fetch the tag object safely
   const tagRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/tags?slug=${slug}`);
+  if (!tagRes.ok) return notFound(); // SAFEGUARD
+  
   const tags = await tagRes.json();
   if (!tags || tags.length === 0) return notFound();
   const tag = tags[0];
@@ -76,11 +98,18 @@ export default async function TagArchivePage({
   const seoTitle = tag.aioseo_head_json?.title || tag.name;
   const seoDescription = tag.aioseo_head_json?.description || tag.description || '';
 
-  // 3. Fetch initial posts for this tag
-  const postsRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&tags=${tag.id}&per_page=10`);
-  const initialPosts = await postsRes.json();
+  // 3. Fetch initial posts for this tag safely
+  let initialPosts = [];
+  try {
+    const postsRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&tags=${tag.id}&per_page=10`);
+    if (postsRes.ok) { // SAFEGUARD
+      initialPosts = await postsRes.json();
+    }
+  } catch (error) {
+    console.error("Failed to load tag posts", error);
+  }
 
-  // 4. Fetch Sidebar Posts
+  // 4. Fetch Sidebar Posts safely
   let sidebarPosts: Post[] = [];
   try {
     const sbRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&per_page=6&categories=7,8`);
