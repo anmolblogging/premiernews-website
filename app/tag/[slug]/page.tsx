@@ -5,18 +5,6 @@ import { Metadata } from 'next';
 import { decodeHtml, getPostPath, Post } from '@/lib/wp';
 import CategorySection from '@/components/CategorySection';
 
-export async function generateStaticParams() {
-  try {
-    const res = await fetch('https://premierleaguenewsnow.com/wp-json/wp/v2/tags?_fields=slug&per_page=100');
-    if (!res.ok) return [{ slug: 'premier-league' }];
-    const tags = await res.json();
-    if (!Array.isArray(tags) || tags.length === 0) return [{ slug: 'premier-league' }];
-    return tags.map((tag: any) => ({ slug: tag.slug }));
-  } catch {
-    return [{ slug: 'premier-league' }];
-  }
-}
-
 // 1. Dynamic SEO Metadata Generator for Tag / Club Archives
 export async function generateMetadata({ 
   params 
@@ -80,9 +68,8 @@ export default async function TagArchivePage({
 
   // 1. Fetch the tag object
   const tagRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/tags?slug=${slug}`);
-  if (!tagRes.ok) return notFound();
   const tags = await tagRes.json();
-  if (!tags || !Array.isArray(tags) || tags.length === 0) return notFound();
+  if (!tags || tags.length === 0) return notFound();
   const tag = tags[0];
 
   // 2. Dynamic Title & Description from AIOSEO
@@ -90,19 +77,13 @@ export default async function TagArchivePage({
   const seoDescription = tag.aioseo_head_json?.description || tag.description || '';
 
   // 3. Fetch initial posts for this tag
-  let initialPosts = [];
-  const WP_FIELDS = "_fields=id,date,link,slug,title,excerpt,_links,_embedded.wp:featuredmedia,_embedded.wp:term";
-  try {
-    const postsRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&${WP_FIELDS}&tags=${tag.id}&per_page=10`);
-    if (postsRes.ok) {
-      initialPosts = await postsRes.json();
-    }
-  } catch {}
+  const postsRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&tags=${tag.id}&per_page=10`);
+  const initialPosts = await postsRes.json();
 
   // 4. Fetch Sidebar Posts
   let sidebarPosts: Post[] = [];
   try {
-    const sbRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&${WP_FIELDS}&per_page=6&categories=7,8`);
+    const sbRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&per_page=6&categories=7,8`);
     if (sbRes.ok) sidebarPosts = await sbRes.json();
   } catch (error) {
     console.error("Failed to load sidebar posts", error);

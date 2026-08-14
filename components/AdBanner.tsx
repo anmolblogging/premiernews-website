@@ -10,14 +10,14 @@ export default function AdBanner({ slotId }: AdBannerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const pushed = useRef(false);
 
-  const isPlaceholder = !slotId || slotId.startsWith('YOUR_');
-
   useEffect(() => {
-    if (isPlaceholder || pushed.current) return;
+    // Prevent double-pushing in React Strict Mode (Localhost)
+    if (pushed.current) return;
 
-    let observer: IntersectionObserver | null = null;
+    let observer: ResizeObserver | null = null;
 
     const pushAd = () => {
+      // Only push the ad if the container is actually visible on the screen (width > 0)
       if (containerRef.current && containerRef.current.offsetWidth > 0 && !pushed.current) {
         pushed.current = true;
         try {
@@ -25,40 +25,31 @@ export default function AdBanner({ slotId }: AdBannerProps) {
             ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
           }
         } catch (error: any) {
-          // Ignore AdSense push warnings
+          console.warn("AdSense warning:", error.message);
         }
+        
+        // Stop observing once the ad is loaded
         if (observer) observer.disconnect();
       }
     };
 
-    if ('IntersectionObserver' in window && containerRef.current) {
-      observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting && !pushed.current) {
-              pushAd();
-            }
-          });
-        },
-        { rootMargin: '200px' }
-      );
+    // 1. Try to push the ad immediately on mount
+    pushAd();
+
+    // 2. If the ad is hidden (e.g., MobileTabs on a Desktop screen), 
+    // observe it. If the user resizes the window and it becomes visible, load the ad then.
+    if (!pushed.current && containerRef.current) {
+      observer = new ResizeObserver(() => {
+        pushAd();
+      });
       observer.observe(containerRef.current);
-    } else {
-      pushAd();
     }
 
+    // Cleanup observer on unmount
     return () => {
       if (observer) observer.disconnect();
     };
-  }, [slotId, isPlaceholder]);
-
-  if (isPlaceholder) {
-    return (
-      <div className="w-full overflow-hidden my-6 flex items-center justify-center bg-slate-50 dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 rounded-xl min-h-[100px] text-slate-400 text-xs font-semibold tracking-widest uppercase shadow-inner">
-        <span>Advertisement</span>
-      </div>
-    );
-  }
+  }, [slotId]);
 
   return (
     <div 

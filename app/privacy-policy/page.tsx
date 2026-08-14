@@ -56,9 +56,8 @@ export default async function StaticPage() {
     { next: { revalidate: 3600 } }
   );
   
-  if (!res.ok) return notFound();
   const pages = await res.json();
-  if (!pages || !Array.isArray(pages) || pages.length === 0) return notFound();
+  if (!pages || pages.length === 0) return notFound();
   const page = pages[0];
 
   let sidebarPosts: Post[] = [];

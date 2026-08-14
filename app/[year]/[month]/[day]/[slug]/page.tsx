@@ -8,26 +8,6 @@ import { decodeHtml, getImageUrl, getPostPath } from '@/lib/wp';
 import Comments from '@/components/Comments';
 import AdBanner from '@/components/AdBanner'; // <-- 1. IMPORT ADBANNER COMPONENT
 
-export async function generateStaticParams() {
-  try {
-    const res = await fetch('https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_fields=date,slug&per_page=50');
-    if (!res.ok) return [{ year: '2026', month: '08', day: '14', slug: 'latest-news' }];
-    const posts = await res.json();
-    if (!Array.isArray(posts) || posts.length === 0) return [{ year: '2026', month: '08', day: '14', slug: 'latest-news' }];
-    return posts.map((post: any) => {
-      const dateObj = new Date(post.date);
-      return {
-        year: String(dateObj.getFullYear()),
-        month: String(dateObj.getMonth() + 1).padStart(2, '0'),
-        day: String(dateObj.getDate()).padStart(2, '0'),
-        slug: post.slug,
-      };
-    });
-  } catch {
-    return [{ year: '2026', month: '08', day: '14', slug: 'latest-news' }];
-  }
-}
-
 export async function generateMetadata({ 
   params 
 }: { 
@@ -93,7 +73,7 @@ export default async function SinglePostPage({
   if (!res.ok) return notFound();
   
   const posts = await res.json();
-  if (!posts || !Array.isArray(posts) || posts.length === 0) return notFound();
+  if (!posts || posts.length === 0) return notFound();
 
   const post = posts[0];
   const categories = post._embedded?.['wp:term']?.[0] || [];
@@ -105,17 +85,16 @@ export default async function SinglePostPage({
   const authorAvatar = authorData?.avatar_urls?.['96'] || authorData?.avatar_urls?.['48'] || `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=4a0e4e&color=fff`;
 
   let recommendedPosts = [];
-  const WP_FIELDS = "_fields=id,date,link,slug,title,excerpt,_links,_embedded.wp:featuredmedia,_embedded.wp:term";
   try {
     const tagIds = tags.map((t: any) => t.id).join(',');
     const queryParam = tagIds ? `tags=${tagIds}` : `categories=${primaryCategory?.id || ''}`;
-    const recRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&${WP_FIELDS}&per_page=3&exclude=${post.id}&${queryParam}`, { next: { revalidate: 300 } });
+    const recRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&per_page=3&exclude=${post.id}&${queryParam}`, { next: { revalidate: 300 } });
     if (recRes.ok) recommendedPosts = await recRes.json();
   } catch (error) {}
 
   let sidebarPosts = [];
   try {
-    const sbRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&${WP_FIELDS}&per_page=6&categories=7,8&exclude=${post.id}`, { next: { revalidate: 300 } });
+    const sbRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&per_page=6&categories=7,8&exclude=${post.id}`, { next: { revalidate: 300 } });
     if (sbRes.ok) sidebarPosts = await sbRes.json();
   } catch (error) {}
 
@@ -199,7 +178,7 @@ export default async function SinglePostPage({
 
             {/* 2. AD UNIT ABOVE ARTICLE CONTENT */}
             <div className="w-full max-w-3xl">
-              <AdBanner slotId="6658379634" />
+              <AdBanner slotId="YOUR_ABOVE_ARTICLE_SLOT_ID" />
             </div>
 
             <div className="w-full max-w-3xl">
@@ -275,7 +254,7 @@ export default async function SinglePostPage({
           <div className="lg:col-span-4 sticky top-24 self-start flex flex-col gap-8">
             
             {/* 4. AD UNIT: SIDEBAR TOP */}
-            <AdBanner slotId="3640703662" />
+            <AdBanner slotId="YOUR_SIDEBAR_TOP_SLOT_ID" />
 
             {sidebarPosts.length > 0 && (
               <div className="bg-white dark:bg-zinc-950 rounded-2xl p-6 border border-slate-200 dark:border-zinc-800 shadow-sm">

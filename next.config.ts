@@ -1,15 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'export',
-  distDir: 'dist',
-  trailingSlash: true,
-  experimental: {
-    optimizePackageImports: ['lucide-react'],
-  },
   images: {
-    unoptimized: true,
-    minimumCacheTTL: 86400,
     remotePatterns: [
       {
         protocol: 'https',

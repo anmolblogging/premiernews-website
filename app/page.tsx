@@ -48,13 +48,13 @@ async function fetchPosts(endpoint: string): Promise<Post[]> {
 }
 
 export default async function HomePage() {
-  // Targeted fields query drastically reduces JSON payload size and boosts FCP/LCP
-  const WP_BASE = "https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&_fields=id,date,link,slug,title,excerpt,_links,_embedded.wp:featuredmedia,_embedded.wp:term";
+  const WP_BASE = "https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&_fields=id,date,link,slug,title,excerpt,_links,_embedded";
 
-  const [initialLatest, initialExclusives, initialAnalysis] = await Promise.all([
+  const [initialLatest, initialExclusives, initialAnalysis, sidebarPosts] = await Promise.all([
     fetchPosts(`${WP_BASE}&per_page=15`),
     fetchPosts(`${WP_BASE}&per_page=10&categories=${CATEGORIES.EXCLUSIVE}`),
     fetchPosts(`${WP_BASE}&per_page=10&categories=${CATEGORIES.ANALYSIS}`),
+    fetchPosts(`${WP_BASE}&per_page=6&categories=${CATEGORIES.ANALYSIS},${CATEGORIES.EXCLUSIVE}`),
   ]);
 
   return (
@@ -72,6 +72,7 @@ export default async function HomePage() {
           latest={initialLatest} 
           analysis={initialAnalysis} 
           exclusive={initialExclusives}
+          sidebarPosts={sidebarPosts}
         />
       </div>
     </main>
