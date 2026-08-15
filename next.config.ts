@@ -13,10 +13,26 @@ const nextConfig: NextConfig = {
         source: '/wp-content/:path*',
         destination: 'https://backend.premierleaguenewsnow.com/wp-content/:path*',
       },
-      // 3. Keep the sitemap tunnel open for Google
+      // 3. Keep all AIOSEO sitemaps and stylesheets open for Google
       {
         source: '/sitemap.xml',
         destination: 'https://backend.premierleaguenewsnow.com/sitemap.xml',
+      },
+      {
+        source: '/sitemap_index.xml',
+        destination: 'https://backend.premierleaguenewsnow.com/sitemap_index.xml',
+      },
+      {
+        source: '/news-sitemap.xml',
+        destination: 'https://backend.premierleaguenewsnow.com/news-sitemap.xml',
+      },
+      {
+        source: '/:path*-sitemap.xml', // Catches post-sitemap.xml, category-sitemap.xml, etc.
+        destination: 'https://backend.premierleaguenewsnow.com/:path*-sitemap.xml',
+      },
+      {
+        source: '/:path*sitemap.xsl', // Catches the styling files so it isn't blank
+        destination: 'https://backend.premierleaguenewsnow.com/:path*sitemap.xsl',
       },
     ];
   },
