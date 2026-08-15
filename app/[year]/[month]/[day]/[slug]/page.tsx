@@ -9,9 +9,10 @@ import Comments from '@/components/Comments';
 import AdBanner from '@/components/AdBanner'; 
 
 // Tell Next.js which article slugs and dates to statically build
+// Revert to your original fast code!
 export async function generateStaticParams() {
   try {
-    const res = await fetch('https://premierleaguenewsnow.com/wp-json/wp/v2/posts?per_page=100');
+    const res = await fetch('https://backend.premierleaguenewsnow.com/wp-json/wp/v2/posts?per_page=100');
     if (!res.ok) return [];
     const posts = await res.json();
     
