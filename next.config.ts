@@ -3,26 +3,17 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   async rewrites() {
     return [
-      {
-        source: '/wp-admin/:path*',
-        destination: 'https://backend.premierleaguenewsnow.com/wp-admin/:path*',
-      },
-      {
-        source: '/wp-includes/:path*',
-        destination: 'https://backend.premierleaguenewsnow.com/wp-includes/:path*',
-      },
-      {
-        source: '/wp-content/:path*',
-        destination: 'https://backend.premierleaguenewsnow.com/wp-content/:path*',
-      },
+      // 1. Keep the API tunnel open so Vercel can fetch your articles
       {
         source: '/wp-json/:path*',
         destination: 'https://backend.premierleaguenewsnow.com/wp-json/:path*',
       },
+      // 2. Keep the media tunnel open for your article images
       {
-        source: '/wp-login.php',
-        destination: 'https://backend.premierleaguenewsnow.com/wp-login.php',
+        source: '/wp-content/:path*',
+        destination: 'https://backend.premierleaguenewsnow.com/wp-content/:path*',
       },
+      // 3. Keep the sitemap tunnel open for Google
       {
         source: '/sitemap.xml',
         destination: 'https://backend.premierleaguenewsnow.com/sitemap.xml',
