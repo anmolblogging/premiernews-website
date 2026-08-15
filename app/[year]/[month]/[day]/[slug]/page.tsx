@@ -6,7 +6,9 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { decodeHtml, getImageUrl, getPostPath } from '@/lib/wp';
 import Comments from '@/components/Comments';
-import AdBanner from '@/components/AdBanner'; 
+import AdBanner from '@/components/AdBanner';
+
+export const revalidate = 60;
 
 // Tell Next.js which article slugs and dates to statically build
 // Revert to your original fast code!

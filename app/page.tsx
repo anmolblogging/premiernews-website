@@ -3,7 +3,7 @@ import MobileTabs from "@/components/MobileTabs";
 import { Post } from "@/lib/wp";
 import { Metadata } from "next";
 
-export const revalidate = 300; 
+export const revalidate = 60; 
 
 export const metadata: Metadata = {
   alternates: {
