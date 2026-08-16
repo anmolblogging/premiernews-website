@@ -8,12 +8,11 @@ import { decodeHtml, getImageUrl, getPostPath } from '@/lib/wp';
 import Comments from '@/components/Comments';
 import AdBanner from '@/components/AdBanner';
 
-export const revalidate = 60;
+// REMOVED: export const revalidate = 60; (Not supported in Static Exports)
 
-// Tell Next.js which article slugs and dates to statically build
-// Revert to your original fast code!
 export async function generateStaticParams() {
   try {
+    // IMPORTANT: In a Static Export, ONLY the posts fetched here will be built into HTML.
     const res = await fetch('https://backend.premierleaguenewsnow.com/wp-json/wp/v2/posts?per_page=100');
     if (!res.ok) return [];
     const posts = await res.json();
@@ -42,12 +41,12 @@ export async function generateMetadata({
   const { slug } = resolvedParams;
 
   try {
+    // UPDATED: Pointing directly to the backend domain and removed Next.js caching rules
     const res = await fetch(
-      `https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&slug=${slug}`,
-      { next: { revalidate: 300 } }
+      `https://backend.premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&slug=${slug}`
     );
 
-    if (!res.ok) return {}; // SAFEGUARD ADDED
+    if (!res.ok) return {}; 
     const posts = await res.json();
     if (!posts || posts.length === 0) return {};
 
@@ -94,12 +93,12 @@ export default async function SinglePostPage({
   const resolvedParams = await params;
   const { slug } = resolvedParams;
 
+  // UPDATED: Pointing directly to the backend domain and removed Next.js caching rules
   const res = await fetch(
-    `https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&slug=${slug}`,
-    { next: { revalidate: 300 } }
+    `https://backend.premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&slug=${slug}`
   );
 
-  if (!res.ok) return notFound(); // SAFEGUARD ADDED
+  if (!res.ok) return notFound();
   
   const posts = await res.json();
   if (!posts || posts.length === 0) return notFound();
@@ -117,13 +116,15 @@ export default async function SinglePostPage({
   try {
     const tagIds = tags.map((t: any) => t.id).join(',');
     const queryParam = tagIds ? `tags=${tagIds}` : `categories=${primaryCategory?.id || ''}`;
-    const recRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&per_page=3&exclude=${post.id}&${queryParam}`, { next: { revalidate: 300 } });
+    // UPDATED URL
+    const recRes = await fetch(`https://backend.premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&per_page=3&exclude=${post.id}&${queryParam}`);
     if (recRes.ok) recommendedPosts = await recRes.json();
   } catch (error) {}
 
   let sidebarPosts = [];
   try {
-    const sbRes = await fetch(`https://premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&per_page=6&categories=7,8&exclude=${post.id}`, { next: { revalidate: 300 } });
+    // UPDATED URL
+    const sbRes = await fetch(`https://backend.premierleaguenewsnow.com/wp-json/wp/v2/posts?_embed&per_page=6&categories=7,8&exclude=${post.id}`);
     if (sbRes.ok) sidebarPosts = await sbRes.json();
   } catch (error) {}
 
@@ -132,7 +133,6 @@ export default async function SinglePostPage({
   return (
     <main className="bg-white dark:bg-zinc-950 pb-20 pt-8">
       
-      {/* INJECT JSON-LD SCHEMA FROM AIOSEO */}
       {post.aioseo_head_json?.schema && (
         <script
           type="application/ld+json"
@@ -193,7 +193,6 @@ export default async function SinglePostPage({
               </div>
             </header>
 
-            {/* Optimized Featured Image */}
             <div className="relative w-full aspect-video mb-8 rounded-xl overflow-hidden shadow-sm bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
               <Image 
                 src={getImageUrl(post)} 
@@ -205,7 +204,6 @@ export default async function SinglePostPage({
               />
             </div>
 
-            {/* 2. AD UNIT ABOVE ARTICLE CONTENT */}
             <div className="w-full max-w-3xl">
               <AdBanner slotId="6658379634" />
             </div>
@@ -234,7 +232,6 @@ export default async function SinglePostPage({
               />
             </div>
 
-            {/* 3. AD UNIT BELOW ARTICLE CONTENT */}
             <div className="w-full max-w-3xl">
               <AdBanner slotId="8574789160" />
             </div>
@@ -282,7 +279,6 @@ export default async function SinglePostPage({
 
           <div className="lg:col-span-4 sticky top-24 self-start flex flex-col gap-8">
             
-            {/* 4. AD UNIT: SIDEBAR TOP */}
             <AdBanner slotId="3640703662" />
 
             {sidebarPosts.length > 0 && (
@@ -309,7 +305,6 @@ export default async function SinglePostPage({
               </div>
             )}
 
-            {/* 5. AD UNIT: SIDEBAR BOTTOM */}
             <AdBanner slotId="3640703662" />
 
             <div className="rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-200 dark:border-zinc-800">
